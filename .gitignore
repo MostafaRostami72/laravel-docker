@@ -1,0 +1,6 @@
+/mysql
+/.idea
+
+/nginx/default.conf
+
+docker-compose.yml

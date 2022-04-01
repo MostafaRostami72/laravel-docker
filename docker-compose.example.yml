@@ -1,0 +1,98 @@
+version: '3'
+
+networks:
+  my_resume:
+    driver: "bridge"
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    container_name: resume_nginx
+    ports:
+      - "433:433"
+      - "80:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - my_resume
+
+  mysql:
+    image: mysql:5.7.29
+    container_name: resume_mysql
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/val/lib/mysql
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    environment:
+      MYSQL_DATABASE: my_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD:my_pass
+      MYSQL_ROOT_PASSWORD:my_pass
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    networks:
+      - my_resume
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resume_php
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - "9000:9000"
+    networks:
+      - my_resume
+
+  redis:
+    image: redis:6.2.6-alpine
+    container_name: test_redis
+    restart: always
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      my_resume:
+
+  composer:
+    image: composer:latest
+    container_name: resume_composer
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - php
+    networks:
+      - my_resume
+  npm:
+    image: node:16.14.2-alpine
+    container_name: resume_npm
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    entrypoint: [ 'npm' ]
+    networks:
+      - my_resume
+
+  artisan:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resume_artisan
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - mysql
+    working_dir: /var/www/html
+    entrypoint: [ 'php','/var/www/html/artisan' ]
+    networks:
+      - my_resume
