@@ -33,8 +33,8 @@ services:
     environment:
       MYSQL_DATABASE: my_db
       MYSQL_USER: root
-      MYSQL_PASSWORD:my_pass
-      MYSQL_ROOT_PASSWORD:my_pass
+      MYSQL_PASSWORD: my_pass
+      MYSQL_ROOT_PASSWORD: my_pass
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
     networks:
