@@ -57,7 +57,7 @@ services:
     container_name: test_redis
     restart: always
     ports:
-      - "6380:6379"
+      - "6379:6379"
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     networks:
